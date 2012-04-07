@@ -2,6 +2,7 @@ package com.github.toxuin;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -20,7 +21,8 @@ public class PVPGearReferee {
         
     	for (PVPItem item : pvpWeapons) {
     		if (Material.getMaterial(item.id) == bully.getItemInHand().getType()) {
-    			newDamage = newDamage * item.damage;
+    			newDamage = (int) Math.round(newDamage * item.damage);
+    			if (PVPGear.debug) Logger.getLogger("Minecraft").info(PVPGear.prefix+"DEBUG: ATTACK * "+item.damage+" ~= "+newDamage);
     		}
     	}
         
@@ -31,7 +33,8 @@ public class PVPGearReferee {
     	for (PVPItem item : pvpArmor) {
     		for (ItemStack equiped : armor) {
 	    		if (Material.getMaterial(item.id) == equiped.getType()) {
-	    			newDamage = newDamage * item.damage;
+	    			newDamage = (int) Math.round(newDamage * item.damage);
+	    			if (PVPGear.debug) Logger.getLogger("Minecraft").info(PVPGear.prefix+"DEBUG: DEFENCE * "+item.damage+" ~= "+newDamage);
 	    		}
     		}
     	}

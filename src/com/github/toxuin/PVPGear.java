@@ -73,7 +73,7 @@ public class PVPGear extends JavaPlugin implements Listener {
             	log.info( prefix + "DEBUG: "+bully.getDisplayName()+" is hitting "+victim.getDisplayName()+" with "+bully.getItemInHand().getType().name());
     			log.info( prefix + "DEBUG: was damage: "+oldDamage+" new damage: "+newDamage);
             }
-            pvpevent.setDamage(PVPGearReferee.getNewDamage(bully, victim, pvpevent.getDamage()));
+            pvpevent.setDamage(newDamage);
            
             
         } else if (attacker instanceof Projectile && attacked instanceof Player) {
@@ -91,11 +91,11 @@ public class PVPGear extends JavaPlugin implements Listener {
                 int oldDamage = pvpevent.getDamage();
                 int newDamage = PVPGearReferee.getNewDamage(bully, victim, pvpevent.getDamage());
                 if (newDamage < 0) newDamage = 0;
-                pvpevent.setDamage(newDamage);
                 if(debug) {
                 	log.info( prefix + "DEBUG: "+bully.getDisplayName()+" is shooting at "+victim.getDisplayName()+" with "+bullet.toString());
         			log.info( prefix + "DEBUG: was damage: "+oldDamage+" new damage: "+newDamage);
-                } 
+                }
+                pvpevent.setDamage(newDamage);
             }
         }
 	}
@@ -112,7 +112,7 @@ public class PVPGear extends JavaPlugin implements Listener {
         	for (String weapon : weapons) {
         		PVPItem item = new PVPItem();
         		item.id = Integer.parseInt(weapon);
-        		item.damage = config.getInt("weapons."+weapon+".damage");
+        		item.damage = config.getDouble("weapons."+weapon+".damage");
         		item.name = config.getString("weapons."+weapon+".name");
         		PVPGearReferee.pvpWeapons.add(item);
         	}
@@ -120,7 +120,7 @@ public class PVPGear extends JavaPlugin implements Listener {
         	for (String gear : armor) {
         		PVPItem item = new PVPItem();
         		item.id = Integer.parseInt(gear);
-        		item.damage = config.getInt("armor."+gear+".damage");
+        		item.damage = config.getDouble("armor."+gear+".damage");
         		item.name = config.getString("armor."+gear+".name");
         		PVPGearReferee.pvpArmor.add(item);
         	}
@@ -128,14 +128,14 @@ public class PVPGear extends JavaPlugin implements Listener {
         	log.info(prefix+"Config loaded!");
         } else {
         	config.set("weapons.283.name", "golden sword");
-        	config.set("weapons.283.damage", 1);
+        	config.set("weapons.283.damage", 4);
         	config.set("weapons.267.name", "iron sword");
         	config.set("weapons.267.damage", 1);
         	
         	config.set("armor.314.name", "golden helmet");
         	config.set("armor.314.damage", 1);
         	config.set("armor.315.name", "golden chestplate");
-        	config.set("armor.315.damage", 1);
+        	config.set("armor.315.damage", 1.0);
         	config.set("armor.316.name", "golden pants");
         	config.set("armor.316.damage", 1);
         	config.set("armor.317.name", "golden boots");
