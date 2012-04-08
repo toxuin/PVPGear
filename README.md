@@ -6,6 +6,8 @@ PVPGear is a simple plugin for Bukkit Minecraft Server that makes some items lik
 
 Items are fully configurable through config so you can make any item to hit foes like thousand swords (or harder!).
 
+Current plugin state: beta. I haven't throughly tested this on productions server so use at your own risk.
+
 ## Configuration ##
 
 Open config.yml and edit values. That's just that simple.
@@ -19,5 +21,7 @@ Each item in both section has two parameters:
 * **damage** - this is a MULTIPLIER of damage. By default it is 1, so no changes to game mechanics are made because X * 1 = X (school maths!). If you want you sword to hit harder - change this to something above 1. If you place here a 2 it will hit harder 2 times. Over-wise, if you want item to be more gentle place here something below 1 (0.5 f.e.).
 
 And the last parameter, **Debug** brings on debug mode. It is for debug.
+
+[Russian discussion thread on rubukkit.org](http://rubukkit.org/)
 
 Isn't this simple?..:)

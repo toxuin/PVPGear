@@ -5,6 +5,9 @@ import java.io.File;
 import java.util.Set;
 import java.util.logging.Logger;
 
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
+import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.EnderPearl;
@@ -37,11 +40,6 @@ public class PVPGear extends JavaPlugin implements Listener {
 		prefix = "[" + pdfFile.getName()+ "]: ";
 		
 		readConfig();
-		
-		if(debug) {
-    		log.info(prefix+"DEBUG: loaded weapons: "+PVPGearReferee.pvpWeapons.size());
-    		log.info(prefix+"DEBUG: loaded armor: "+PVPGearReferee.pvpArmor.size());
-    	}
 		
 		this.getServer().getPluginManager().registerEvents(this, this);
 		
@@ -100,6 +98,20 @@ public class PVPGear extends JavaPlugin implements Listener {
         }
 	}
 	
+	public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args) {
+		if(cmd.getName().equalsIgnoreCase("pvpgear")) {
+			if (args[0].equalsIgnoreCase("reload")) {
+				if (sender instanceof ConsoleCommandSender) {
+					PVPGearReferee.pvpWeapons.clear();
+					PVPGearReferee.pvpArmor.clear();
+					readConfig();
+				}
+			}
+			return true;
+		}
+		return false; 
+	}
+	
 	private void readConfig () {
     	configFile = new File(directory,"config.yml");
         config = YamlConfiguration.loadConfiguration(configFile);
@@ -123,6 +135,11 @@ public class PVPGear extends JavaPlugin implements Listener {
         		item.damage = config.getDouble("armor."+gear+".damage");
         		item.name = config.getString("armor."+gear+".name");
         		PVPGearReferee.pvpArmor.add(item);
+        	}
+        	
+        	if(debug) {
+        		log.info(prefix+"DEBUG: loaded weapons: "+PVPGearReferee.pvpWeapons.size());
+        		log.info(prefix+"DEBUG: loaded armor: "+PVPGearReferee.pvpArmor.size());
         	}
         	
         	log.info(prefix+"Config loaded!");

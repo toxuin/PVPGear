@@ -1,5 +1,9 @@
 name: PVPGear
 main: com.github.toxuin.PVPGear
-version: 0.02
+version: 0.03
 author: toxuin
 description: Makes some items more useful in PVP
+
+commands:
+  pvpgear:
+    description: does all the job for PVPGear plugin
