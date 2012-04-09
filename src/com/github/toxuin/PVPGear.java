@@ -137,10 +137,9 @@ public class PVPGear extends JavaPlugin implements Listener {
 				if (sender instanceof ConsoleCommandSender) {
 					PVPGearReferee.pvpWeapons.clear();
 					PVPGearReferee.pvpArmor.clear();
+					PVPGearReferee.pvpEnchants.clear();
 					readConfig();
 				}
-			} else if(args[0].equalsIgnoreCase("debug")) {
-				log.info(prefix+" DEBUG VALUE: "+PVPGearReferee.checkFireTicks((Player) sender, true));
 			}
 			return true;
 		}
