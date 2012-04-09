@@ -22,6 +22,6 @@ Each item in both section has two parameters:
 
 And the last parameter, **Debug** brings on debug mode. It is for debug.
 
-[Russian discussion thread on rubukkit.org](http://rubukkit.org/)
+[Russian discussion thread on rubukkit.org](http://rubukkit.org/threads/thread.11756/)
 
 Isn't this simple?..:)

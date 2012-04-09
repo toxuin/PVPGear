@@ -61,13 +61,13 @@ public class PVPGear extends JavaPlugin implements Listener {
         Entity attacker = attackEvent.getDamager(); // WHO DEALS DAMAGE
         
         if (attacker instanceof Player && attacked instanceof Player) {
+        	// PVP MELEE ATTACK
             Player bully = (Player) attacker;
             Player victim = (Player) attacked;
 
             int oldDamage = attackEvent.getDamage();
             int newDamage = PVPGearReferee.getPvpDamage(bully, victim, attackEvent.getDamage());
             if (newDamage < 0) newDamage = 0;
-            attackEvent.setDamage(newDamage);
             if(debug) {
             	log.info( prefix + "DEBUG: "+bully.getDisplayName()+" is hitting "+victim.getDisplayName()+" with "+bully.getItemInHand().getType().name());
     			log.info( prefix + "DEBUG: was damage: "+oldDamage+" new damage: "+newDamage);
@@ -97,12 +97,22 @@ public class PVPGear extends JavaPlugin implements Listener {
                 attackEvent.setDamage(newDamage);
             }
         } else if (attacker instanceof Player && attacked instanceof CraftMonster) {
-        	
-        	
-        	
-        	log.info(prefix+" "+attacker.toString()+" is attacking "+attacked.toString());
+        	// PVE MELEE ATACK
+        	Player bully = (Player) attacker;
+
+            int oldDamage = attackEvent.getDamage();
+            int newDamage = PVPGearReferee.getPveDamage(bully, attacked, attackEvent.getDamage());
+            if (newDamage < 0) newDamage = 0;
+            if(debug) {
+            	log.info( prefix + "DEBUG: "+bully.getDisplayName()+" is hitting "+attacked.toString()+" with "+bully.getItemInHand().getType().name());
+    			log.info( prefix + "DEBUG: was damage: "+oldDamage+" new damage: "+newDamage);
+            }
+            if(debug) log.info(prefix+"DEBUG: "+bully.getDisplayName()+" is attacking "+attacked.toString());
+            
+            attackEvent.setDamage(newDamage);
+
         } else if (attacker instanceof Projectile && attacked instanceof CraftMonster) {
-        	
+        	// PVE SHOOTING
         	Projectile bullet = (Projectile) attacker;
         	LivingEntity shooter = bullet.getShooter();
         	
@@ -110,13 +120,13 @@ public class PVPGear extends JavaPlugin implements Listener {
         		Player bully = (Player) shooter;
         		
         		int oldDamage = attackEvent.getDamage();
-        		int newDamage = PVPGearReferee.getPveDamage(bully, attackEvent.getDamage());
+        		int newDamage = PVPGearReferee.getPveDamage(bully, attacked, attackEvent.getDamage());
         		if (newDamage > 0) newDamage = 0;
-        		attackEvent.setDamage(newDamage);
         		if(debug) {
                 	log.info( prefix + "DEBUG: "+bully.getDisplayName()+" is shooting at "+attacked.getType().getName()+" with "+bullet.toString());
         			log.info( prefix + "DEBUG: was damage: "+oldDamage+" new damage: "+newDamage);
                 }
+        		attackEvent.setDamage(newDamage);
         	}
         }
 	}
@@ -129,6 +139,8 @@ public class PVPGear extends JavaPlugin implements Listener {
 					PVPGearReferee.pvpArmor.clear();
 					readConfig();
 				}
+			} else if(args[0].equalsIgnoreCase("debug")) {
+				log.info(prefix+" DEBUG VALUE: "+PVPGearReferee.checkFireTicks((Player) sender, true));
 			}
 			return true;
 		}
@@ -142,13 +154,19 @@ public class PVPGear extends JavaPlugin implements Listener {
         if (configFile.exists()) {
         	Set<String> weapons = config.getConfigurationSection("weapons").getKeys(false);
         	Set<String> armor = config.getConfigurationSection("armor").getKeys(false);
+        	Set<String> auras = config.getConfigurationSection("enchantments").getKeys(false);
         	debug = config.getBoolean("Debug");
         	
         	for (String weapon : weapons) {
         		PVPItem item = new PVPItem();
         		item.id = Integer.parseInt(weapon);
-        		item.pvpDamage = config.getDouble("weapons."+weapon+".pvp-damage");
-        		item.pveDamage = config.getDouble("weapons."+weapon+".pve-damage");
+        		
+        		item.pvpEffects.damage = config.getDouble("weapons."+weapon+".pvp-effects.damage");
+        		item.pvpEffects.ignite = config.getInt("weapons."+weapon+".pvp-effects.ignite");
+        		
+        		item.pveEffects.damage = config.getDouble("weapons."+weapon+".pve-effects.damage");
+        		item.pveEffects.ignite = config.getInt("weapons."+weapon+".pve-effects.ignite");
+
         		item.name = config.getString("weapons."+weapon+".name");
         		PVPGearReferee.pvpWeapons.add(item);
         	}
@@ -156,10 +174,24 @@ public class PVPGear extends JavaPlugin implements Listener {
         	for (String gear : armor) {
         		PVPItem item = new PVPItem();
         		item.id = Integer.parseInt(gear);
-        		item.pvpDamage = config.getDouble("armor."+gear+".pvp-damage");
-        		item.pveDamage = config.getDouble("armor."+gear+".pve-damage");
+        		item.pvpEffects.damage = config.getDouble("armor."+gear+".pvp-effects.damage");
+        		item.pvpEffects.ignite = config.getInt("armor."+gear+".pvp-effects.ignite");
+        		
+        		item.pveEffects.damage = config.getDouble("armor."+gear+".pvp-effects.damage");
+        		item.pveEffects.ignite = config.getInt("armor."+gear+".pvp-effects.ignite");
+        		
         		item.name = config.getString("armor."+gear+".name");
         		PVPGearReferee.pvpArmor.add(item);
+        	}
+        	
+        	for (String ench : auras) {
+        		PVPItem enchant = new PVPItem();
+        		enchant.id = Integer.parseInt(ench);
+        		enchant.pvpEffects.damage = config.getDouble("enchantments."+ench+".pvp-effects.damage");
+        		enchant.pvpEffects.ignite = config.getInt("enchantments."+ench+".pvp-effects.ignite");
+        		
+        		enchant.name = config.getString("armor."+ench+".name");
+        		PVPGearReferee.pvpEnchants.add(enchant);
         	}
         	
         	if(debug) {
@@ -170,25 +202,57 @@ public class PVPGear extends JavaPlugin implements Listener {
         	log.info(prefix+"Config loaded!");
         } else {
         	config.set("weapons.283.name", "golden sword");
-        	config.set("weapons.283.pvp-damage", 1.0);
-        	config.set("weapons.283.pve-damage", 1.0);
+        	config.set("weapons.283.pvp-effects.damage", 1.0);
+        	config.set("weapons.283.pvp-effects.ignite", 0);
+        	config.set("weapons.283.pve-effects.damage", 1.0);
+        	config.set("weapons.283.pve-effects.ignite", 0);
+        	
         	config.set("weapons.267.name", "iron sword");
-        	config.set("weapons.267.pvp-damage", 1.0);
-        	config.set("weapons.267.pve-damage", 1.0);
+        	config.set("weapons.267.pvp-effects.damage", 1.0);
+        	config.set("weapons.267.pvp-effects.ignite", 0);
+        	config.set("weapons.267.pve-effects.damage", 1.0);
+        	config.set("weapons.267.pve-effects.ignite", 0);
+        	
         	
         	config.set("armor.314.name", "golden helmet");
-        	config.set("armor.314.pvp-damage", 1.0);
-        	config.set("armor.314.pve-damage", 1.0);
-        	config.set("armor.315.name", "golden chestplate");
-        	config.set("armor.315.pvp-damage", 1.0);
-        	config.set("armor.315.pve-damage", 1.0);
-        	config.set("armor.316.name", "golden pants");
-        	config.set("armor.316.pvp-damage", 1.0);
-        	config.set("armor.316.pve-damage", 1.0);
-        	config.set("armor.317.name", "golden boots");
-        	config.set("armor.317.pvp-damage", 1.0);
-        	config.set("armor.317.pve-damage", 1.0);
+        	config.set("armor.314.pvp-effects.damage", 1.0);
+        	config.set("armor.314.pvp-effects.ignite", 0);
+        	config.set("armor.314.pve-effects.damage", 1.0);
+        	config.set("armor.314.pve-effects.ignite", 0);
         	
+        	config.set("armor.315.name", "golden chestplate");
+        	config.set("armor.315.pvp-effects.damage", 1.0);
+        	config.set("armor.315.pvp-effects.ignite", 0);
+        	config.set("armor.315.pve-effects.damage", 1.0);
+        	config.set("armor.315.pve-effects.ignite", 0);
+        	
+        	
+        	config.set("armor.316.name", "golden pants");
+        	config.set("armor.316.pvp-effects.damage", 1.0);
+        	config.set("armor.316.pvp-effects.ignite", 0);
+        	config.set("armor.316.pve-effects.damage", 1.0);
+        	config.set("armor.316.pve-effects.ignite", 0);
+        	
+        	config.set("armor.317.name", "golden boots");
+        	config.set("armor.317.pvp-effects.damage", 1.0);
+        	config.set("armor.317.pvp-effects.ignite", 0);
+        	config.set("armor.317.pve-effects.damage", 1.0);
+        	config.set("armor.317.pve-effects.ignite", 0);
+        	
+        	
+        	config.set("enchantments.3.name", "protection from explosions");
+        	config.set("enchantments.3.pvp-effects.damage", 1.0);
+        	config.set("enchantments.3.pvp-effects.ignite", 0);
+        	config.set("enchantments.3.pve-effects.damage", 1.0);
+        	config.set("enchantments.3.pve-effects.ignite", 0);
+        	
+        	config.set("enchantments.17.name", "damage to undead");
+        	config.set("enchantments.17.pvp-effects.damage", 1);
+        	config.set("enchantments.17.pvp-effects.ignite", 0);
+        	config.set("enchantments.17.pve-effects.damage", 1.0);
+        	config.set("enchantments.17.pve-effects.ignite", 0);
+        	
+        	config.set("Version", this.getDescription().getVersion());
         	config.set("Debug", false);
         	
         	try {
