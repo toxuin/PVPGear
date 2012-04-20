@@ -1,9 +1,22 @@
 name: PVPGear
 main: com.github.toxuin.PVPGear
-version: 0.03
+version: 0.04
 author: toxuin
 description: Makes some items more useful in PVP
 
 commands:
   pvpgear:
     description: does all the job for PVPGear plugin
+
+permissions:
+    pvpgear.*:
+        description: changes player's damage and ignite behaviour
+        children:
+            pvpgear.pvp: false
+            pvpgear.pve: false
+    pvpgear.pvp:
+        description: changes damage and ignition in pvp
+        default: op
+    pvpgear.pve:
+        description: changes damage and ignition in pve
+        default: op    

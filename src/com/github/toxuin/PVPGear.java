@@ -64,6 +64,8 @@ public class PVPGear extends JavaPlugin implements Listener {
         	// PVP MELEE ATTACK
             Player bully = (Player) attacker;
             Player victim = (Player) attacked;
+            
+            if(!bully.hasPermission("pvpgear.pvp")) return;
 
             int oldDamage = attackEvent.getDamage();
             int newDamage = PVPGearReferee.getPvpDamage(bully, victim, attackEvent.getDamage());
@@ -87,6 +89,8 @@ public class PVPGear extends JavaPlugin implements Listener {
                 Player bully = (Player) shooter;
                 Player victim = (Player) attacked;
 
+                if(!bully.hasPermission("pvpgear.pvp")) return;
+                
                 int oldDamage = attackEvent.getDamage();
                 int newDamage = PVPGearReferee.getPvpDamage(bully, victim, attackEvent.getDamage());
                 if (newDamage < 0) newDamage = 0;
@@ -99,7 +103,8 @@ public class PVPGear extends JavaPlugin implements Listener {
         } else if (attacker instanceof Player && attacked instanceof CraftMonster) {
         	// PVE MELEE ATACK
         	Player bully = (Player) attacker;
-
+        	if(!bully.hasPermission("pvpgear.pve")) return;
+            
             int oldDamage = attackEvent.getDamage();
             int newDamage = PVPGearReferee.getPveDamage(bully, attacked, attackEvent.getDamage());
             if (newDamage < 0) newDamage = 0;
@@ -118,10 +123,11 @@ public class PVPGear extends JavaPlugin implements Listener {
         	
         	if (shooter instanceof Player) {
         		Player bully = (Player) shooter;
+        		if(!bully.hasPermission("pvpgear.pve")) return;
         		
         		int oldDamage = attackEvent.getDamage();
         		int newDamage = PVPGearReferee.getPveDamage(bully, attacked, attackEvent.getDamage());
-        		if (newDamage > 0) newDamage = 0;
+        		if (newDamage < 0) newDamage = 0;
         		if(debug) {
                 	log.info( prefix + "DEBUG: "+bully.getDisplayName()+" is shooting at "+attacked.getType().getName()+" with "+bullet.toString());
         			log.info( prefix + "DEBUG: was damage: "+oldDamage+" new damage: "+newDamage);

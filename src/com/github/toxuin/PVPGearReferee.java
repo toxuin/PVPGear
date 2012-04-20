@@ -51,17 +51,17 @@ public class PVPGearReferee {
 		
 		// THIS IS pvE - BOOST DAMAGE FOR ARMOR, BOOST DAMAGE FOR ITEM IN HAND
 		
+		double chkWep = checkWeapon(bully, false);
+		double chkEnch = checkEnchantments(bully, false);
+		double chkArm = checkArmor(bully, false);
+		
 		// SCAN FOR ITEM IN HAND
-		
-		newDamage = newDamage * (int) Math.round(checkWeapon(bully, false));
-		
-		// SCAN FOR ENCHANTMENTS
-		
-		newDamage = newDamage * (int) Math.round(checkEnchantments(bully, false));
+		newDamage = newDamage * (int) Math.round(chkWep);
+		// SCAN FOR ENCHANTMENT
+		newDamage = newDamage * (int) Math.round(chkEnch);
 		
 		// SCAN FOR PVE BOOSTER ARMOR
-		
-		newDamage = (int) Math.round(newDamage * checkArmor(bully, false));
+		newDamage = newDamage * (int) Math.round(chkArm);
 		
 		// IGNITE MONSTER!!!
 		int fireTicks = checkFireTicks(bully, false);
